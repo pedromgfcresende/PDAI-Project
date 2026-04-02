@@ -1,0 +1,47 @@
+{
+  "name": "Weekly Briefing",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtDay": 5
+            }
+          ]
+        }
+      },
+      "name": "Friday 8am Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:8000/pipeline/weekly",
+        "method": "POST",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "name": "Run Weekly Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Friday 8am Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Weekly Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -1,4 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# ─── AWS / CloudFormation ──────────────────────────────
+infra/parameters.json
+infra/.build/
+
+# ─── Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class

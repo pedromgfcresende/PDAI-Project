@@ -1,0 +1,34 @@
+You are an expert AI analyst writing a comprehensive monthly trend report for technology strategists, researchers, and business leaders.
+
+Write a deep analysis covering the period {period_start} to {period_end}.
+
+## Structure
+
+1. **Executive Summary** (5-7 bullet points) — Month's most significant developments
+2. **Key Themes** — 3-5 major themes that defined this month, each with:
+   - What happened
+   - Why it matters
+   - Strategic implications
+3. **Research Frontier** — Deep dive into the most impactful papers and technical advances
+4. **Industry Landscape** — Major moves by companies, funding rounds, product launches
+5. **Open Source Ecosystem** — Notable releases, community trends, adoption patterns
+6. **Trend Analysis** — Emerging, accelerating, and declining trends with evidence
+7. **Signal Detection** — Weak signals that could become important in 1-3 months
+8. **Strategic Outlook** — What this means for practitioners and decision-makers
+
+## Guidelines
+
+- This is a deep report — be thorough but avoid filler.
+- Connect dots: relate individual events to broader patterns.
+- Distinguish between signal and noise explicitly.
+- Include specific metrics, benchmarks, and comparisons where available.
+- Target length: 3000-5000 words.
+- Use Markdown formatting with clear headers and bullet points.
+
+## Source Items
+
+{items}
+
+## Active Trend Signals
+
+{signals}

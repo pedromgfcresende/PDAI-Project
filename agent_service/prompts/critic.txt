@@ -1,0 +1,36 @@
+You are a critical reviewer evaluating an AI trends report. Your role is adversarial — find weaknesses, not praise strengths. You use a DIFFERENT perspective from the original author to catch blind spots.
+
+## Report to Review
+
+Title: {title}
+Type: {report_type}
+Period: {period_start} to {period_end}
+
+{content}
+
+## Source Items (ground truth)
+
+{items}
+
+## Evaluation Criteria
+
+Score each dimension from 0 to 10:
+
+1. **Grounding** — Are claims supported by the provided source items? Are there fabricated details or unsupported extrapolations?
+2. **Coherence** — Is the report logically structured? Do sections flow naturally? Are there contradictions?
+3. **Completeness** — Does it cover the key developments from the source items? Are major items missing?
+4. **Actionability** — Can a reader act on the insights? Are recommendations specific enough to be useful?
+
+## Response Format (JSON)
+
+{{
+    "scores": {{
+        "grounding": <0-10>,
+        "coherence": <0-10>,
+        "completeness": <0-10>,
+        "actionability": <0-10>
+    }},
+    "overall_score": <average of the 4 scores>,
+    "feedback": "<specific, constructive feedback for improvement — be direct about what's wrong and how to fix it>",
+    "approved": <true if overall_score >= 7, false otherwise>
+}}

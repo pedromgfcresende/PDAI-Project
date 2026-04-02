@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "Project",
+    "ParameterValue": "ai-trends"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "prod"
+  },
+  {
+    "ParameterKey": "DBPassword",
+    "ParameterValue": "CHANGE_ME_strong_password"
+  },
+  {
+    "ParameterKey": "AnthropicApiKey",
+    "ParameterValue": "sk-ant-..."
+  },
+  {
+    "ParameterKey": "GroqApiKey",
+    "ParameterValue": "gsk_..."
+  },
+  {
+    "ParameterKey": "GithubToken",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "ContainerImage",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "SESEmail",
+    "ParameterValue": ""
+  }
+]
