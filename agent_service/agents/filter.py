@@ -1,4 +1,6 @@
 import json
+import re
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -14,7 +16,7 @@ PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "filter.txt"
 
 def get_filter_llm() -> ChatAnthropic:
     return ChatAnthropic(
-        model="claude-haiku-4-5-20241022",
+        model="claude-haiku-4-5-20251001",
         api_key=settings.anthropic_api_key,
         max_tokens=300,
         temperature=0,
@@ -44,7 +46,12 @@ def filter_item(item: dict) -> FilterResult:
     ])
 
     try:
-        data = json.loads(response.content)
+        text = response.content
+        # Strip markdown code blocks if present
+        match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+        if match:
+            text = match.group(1)
+        data = json.loads(text)
         return FilterResult(**data)
     except (json.JSONDecodeError, Exception) as e:
         # Graceful fallback: assign low scores so item doesn't get lost
@@ -58,9 +65,22 @@ def filter_item(item: dict) -> FilterResult:
 
 
 def filter_batch(items: list[dict]) -> list[FilterResult]:
-    """Score a batch of items. Processes sequentially to respect rate limits."""
+    """Score a batch of items. Processes sequentially with rate limit handling."""
     results = []
-    for item in items:
-        result = filter_item(item)
-        results.append(result)
+    for i, item in enumerate(items):
+        for attempt in range(3):
+            try:
+                result = filter_item(item)
+                results.append(result)
+                break
+            except Exception as e:
+                if "rate" in str(e).lower() or "429" in str(e):
+                    wait = 2 ** attempt * 5
+                    print(f"[filter] Rate limited on item {i+1}, waiting {wait}s...")
+                    time.sleep(wait)
+                else:
+                    raise
+        # 1.5s delay = ~40 req/min, safely under Haiku's 50 req/min limit
+        if i < len(items) - 1:
+            time.sleep(1.5)
     return results

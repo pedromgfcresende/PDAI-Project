@@ -103,20 +103,21 @@ def insert_report(
     content_md: str,
     period_start: date,
     period_end: date,
+    content_html: str | None = None,
     quality_score: float | None = None,
     critic_feedback: dict | None = None,
     revision_count: int = 0,
     item_ids: list[int] | None = None,
 ) -> int:
     sql = """
-        INSERT INTO reports (report_type, title, content_md, period_start, period_end,
+        INSERT INTO reports (report_type, title, content_md, content_html, period_start, period_end,
                              quality_score, critic_feedback, revision_count, item_ids)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id
     """
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(sql, (
-            report_type, title, content_md, period_start, period_end,
+            report_type, title, content_md, content_html, period_start, period_end,
             quality_score, json.dumps(critic_feedback or {}),
             revision_count, item_ids or [],
         ))
@@ -127,7 +128,7 @@ def insert_report(
 
 def get_latest_reports(report_type: str, limit: int = 10) -> list[dict]:
     sql = """
-        SELECT id, report_type, title, content_md, period_start, period_end,
+        SELECT id, report_type, title, content_md, content_html, period_start, period_end,
                quality_score, revision_count, published, created_at
         FROM reports
         WHERE report_type = %s
@@ -137,6 +138,31 @@ def get_latest_reports(report_type: str, limit: int = 10) -> list[dict]:
     with get_connection() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute(sql, (report_type, limit))
         return [dict(row) for row in cur.fetchall()]
+
+
+def get_report_by_id(report_id: int) -> dict | None:
+    sql = """
+        SELECT id, report_type, title, content_md, content_html, period_start, period_end,
+               quality_score, critic_feedback, revision_count, item_ids, published, created_at
+        FROM reports
+        WHERE id = %s
+    """
+    with get_connection() as conn, conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(sql, (report_id,))
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def get_scored_item_count() -> int:
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM items WHERE relevance_score IS NOT NULL")
+        return cur.fetchone()[0]
+
+
+def get_signal_count() -> int:
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM signals WHERE active = TRUE")
+        return cur.fetchone()[0]
 
 
 def insert_signal(

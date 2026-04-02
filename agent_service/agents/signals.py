@@ -1,4 +1,5 @@
 import json
+import re
 from collections import Counter
 
 from dotenv import load_dotenv
@@ -34,7 +35,7 @@ Return a JSON array of signals. Return an empty array if no clear signals are fo
 
 def get_signal_llm() -> ChatAnthropic:
     return ChatAnthropic(
-        model="claude-haiku-4-5-20241022",
+        model="claude-haiku-4-5-20251001",
         api_key=settings.anthropic_api_key,
         max_tokens=1024,
         temperature=0.1,
@@ -62,7 +63,11 @@ def detect_signals(items: list[dict]) -> list[TrendSignal]:
     response = llm.invoke([{"role": "user", "content": prompt}])
 
     try:
-        signals_data = json.loads(response.content)
+        text = response.content
+        match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
+        if match:
+            text = match.group(1)
+        signals_data = json.loads(text)
         signals = []
         for s in signals_data:
             # Map evidence indices to actual item IDs

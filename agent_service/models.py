@@ -113,9 +113,13 @@ class ReportResponse(BaseModel):
     report_type: ReportType
     title: str
     content_md: str
+    content_html: str | None = None
     quality_score: float | None
     revision_count: int
     published: bool
+    period_start: date | None = None
+    period_end: date | None = None
+    created_at: datetime | None = None
 
 
 class HealthResponse(BaseModel):

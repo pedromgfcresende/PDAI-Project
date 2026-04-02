@@ -14,7 +14,7 @@ PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 
 def get_synthesis_llm() -> ChatAnthropic:
     return ChatAnthropic(
-        model="claude-sonnet-4-6-20250514",
+        model="claude-sonnet-4-5-20250929",
         api_key=settings.anthropic_api_key,
         max_tokens=4096,
         temperature=0.3,
