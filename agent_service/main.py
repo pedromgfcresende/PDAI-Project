@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from langsmith import traceable
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from agent_service import db
 from agent_service.agents.filter import filter_batch
@@ -17,7 +17,7 @@ from agent_service.ingestion.github_trending import fetch_github_trending
 from agent_service.ingestion.normalize import compute_embedding
 from agent_service.ingestion.rss_news import fetch_rss_news
 from agent_service.ingestion.semantic_scholar import fetch_semantic_scholar
-from agent_service.models import HealthResponse, IngestResponse, ReportResponse, ReportType
+from agent_service.models import IngestResponse, ReportResponse, ReportType
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -395,7 +395,6 @@ format:
         content=report["content_md"],
     )
 
-    from fastapi.responses import PlainTextResponse
     return PlainTextResponse(
         content=qmd,
         media_type="text/plain",

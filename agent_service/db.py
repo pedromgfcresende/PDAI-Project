@@ -1,6 +1,7 @@
 import json
 from datetime import date, datetime
 
+import numpy as np
 import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
@@ -199,7 +200,6 @@ def get_active_signals() -> list[dict]:
 
 def search_items_by_embedding(query_embedding: list[float], limit: int = 10) -> list[dict]:
     """Find items most similar to the query embedding using pgvector cosine distance."""
-    import numpy as np
     vec = np.array(query_embedding, dtype=np.float32)
     sql = """
         SELECT id, source, title, summary, url, relevance_score, novelty_score, topics, published_at

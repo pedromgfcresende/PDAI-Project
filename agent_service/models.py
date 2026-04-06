@@ -11,7 +11,6 @@ class SourceType(str, Enum):
     SEMANTIC_SCHOLAR = "semantic_scholar"
     RSS = "rss"
     GITHUB = "github"
-    HUGGINGFACE = "huggingface"
 
 
 class ReportType(str, Enum):

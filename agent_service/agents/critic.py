@@ -85,23 +85,13 @@ def critique(
 
     # Fallback to Gemini
     try:
-        raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
-        # Llama often puts text before the JSON — find the first {
-        brace = raw.find("{")
-        if brace > 0:
-            raw = raw[brace:]
-        data = json.loads(raw)
-        scores = CriticScores(**data["scores"])
-        return CriticResult(
-            scores=scores,
-            overall_score=data.get("overall_score", sum(scores.model_dump().values()) / 4),
-            feedback=data.get("feedback", ""),
-            approved=data.get("approved", False),
-        )
-    except (json.JSONDecodeError, KeyError, Exception) as e:
+        response = get_gemini_llm().invoke(messages)
+        return _parse_critic_response(response.content)
+    except Exception as e:
+        print(f"[critic] Gemini fallback also failed: {e}")
         return CriticResult(
             scores=CriticScores(grounding=5, coherence=5, completeness=5, actionability=5),
             overall_score=5.0,
-            feedback=f"Critic response could not be parsed: {e}. Manual review recommended.",
+            feedback=f"Both Groq and Gemini failed. Manual review recommended.",
             approved=False,
         )
