@@ -14,7 +14,7 @@ PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 
 def get_synthesis_llm() -> ChatAnthropic:
     return ChatAnthropic(
-        model="claude-haiku-4-5-20251001",  # TODO: upgrade to Sonnet when API key supports it
+        model="claude-sonnet-4-5-20250929",
         api_key=settings.anthropic_api_key,
         max_tokens=4096,
         temperature=0.3,

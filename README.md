@@ -2,8 +2,8 @@
 
 A multi-agent system that automatically collects AI research papers, news, and signals from public sources, filters out noise, and produces actionable intelligence reports.
 
-**University project** for Prototyping Products with AI (PDAI) at ESADE Business School.
-**Team:** Pedro Resende & Leo Matthey | MiBA Second Term, 2025.
+**Final project** for Prototyping Products with AI (PDAI) at ESADE Business School.
+**Team:** Group A | MiBA Second Term, 2025.
 
 ## What It Does
 
@@ -178,4 +178,4 @@ PDAI-Project/
 
 ## License
 
-University project -- ESADE Business School, MiBA 2025.
+Final project -- ESADE Business School, MiBA 2025.

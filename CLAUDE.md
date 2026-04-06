@@ -7,8 +7,8 @@
 1. **Weekly Briefing** — Concise synthesis of the most important AI developments
 2. **Monthly Deep Report** — Comprehensive trend analysis with strategic signals
 
-University group project for **Prototyping Products with AI (PDAI)** at ESADE Business School.
-Team: **Pedro Resende** & **Leo Matthey** | MiBA Second Term.
+Final project for **Prototyping Products with AI (PDAI)** at ESADE Business School.
+Team: **Group A** | MiBA Second Term.
 
 ---
 
