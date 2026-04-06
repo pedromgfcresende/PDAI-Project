@@ -155,6 +155,9 @@ def detect_trend_signals(days: int = 7, use_llm: bool = True):
     else:
         signals = detect_signals_simple(items)
 
+    # Deactivate old signals before storing new ones
+    db.deactivate_all_signals()
+
     # Store signals
     for signal in signals:
         db.insert_signal(

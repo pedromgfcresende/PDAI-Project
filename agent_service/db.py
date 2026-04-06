@@ -166,6 +166,13 @@ def get_signal_count() -> int:
         return cur.fetchone()[0]
 
 
+def deactivate_all_signals() -> None:
+    """Deactivate all existing signals before detecting new ones."""
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute("UPDATE signals SET active = FALSE")
+        conn.commit()
+
+
 def insert_signal(
     signal_type: str,
     topic: str,

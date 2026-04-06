@@ -10,8 +10,13 @@ from agent_service.models import TrendSignal
 
 load_dotenv()
 
-SIGNAL_PROMPT = """Analyze the following batch of AI/ML items and identify trend signals.
+SIGNAL_PROMPT = """Analyze the following batch of AI/ML items and identify the TOP 5 most significant trend signals.
 A signal is a pattern across multiple items that suggests an emerging, accelerating, or disruptive trend.
+
+IMPORTANT:
+- Return EXACTLY 5 signals maximum, ranked by importance. Quality over quantity.
+- Each signal must be DISTINCT — do not return overlapping or redundant signals.
+- Merge related patterns into a single signal rather than listing them separately.
 
 Signal types:
 - **emergence**: A new topic/approach appearing for the first time across multiple sources
@@ -25,7 +30,7 @@ For each signal, provide:
 - strength: 0.0-1.0 (how confident you are this is a real trend, not noise)
 - evidence_ids: list of item indices (from the numbered list) supporting this signal
 
-Return a JSON array of signals. Return an empty array if no clear signals are found.
+Return a JSON array of exactly 5 signals (or fewer if there aren't enough clear patterns). Return an empty array if no clear signals are found.
 
 ## Items
 
