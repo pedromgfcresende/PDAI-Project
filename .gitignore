@@ -151,6 +151,11 @@ env.bak/
 env/
 htmlcov/
 infra/.build/
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
 infra/parameters.json
 instance/
 ipython_config.py
