@@ -43,13 +43,13 @@ case "$command" in
   ssh)
     IP=$(terraform output -raw instance_public_ip)
     KEY=$(terraform output -raw ssh_command | grep -oP '(?<=-i )\S+')
-    ssh -i "$KEY" ec2-user@"$IP"
+    ssh -i "$KEY" ubuntu@"$IP"
     ;;
 
   logs)
     IP=$(terraform output -raw instance_public_ip)
     KEY=$(terraform output -raw ssh_command | grep -oP '(?<=-i )\S+')
-    ssh -i "$KEY" ec2-user@"$IP" "tail -f /var/log/user-data.log"
+    ssh -i "$KEY" ubuntu@"$IP" "tail -f /var/log/user-data.log"
     ;;
 
   destroy)

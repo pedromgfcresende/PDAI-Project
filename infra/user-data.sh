@@ -6,20 +6,14 @@ exec > /var/log/user-data.log 2>&1
 echo "=== Starting setup at $(date) ==="
 
 # --- Install Docker ---
-dnf update -y
-dnf install -y docker git nginx
+apt-get update -y
+apt-get install -y docker.io docker-compose-v2 git nginx
 systemctl enable docker
 systemctl start docker
-usermod -aG docker ec2-user
-
-# Install Docker Compose plugin
-mkdir -p /usr/local/lib/docker/cli-plugins
-curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" \
-  -o /usr/local/lib/docker/cli-plugins/docker-compose
-chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+usermod -aG docker ubuntu
 
 # --- Clone the project ---
-cd /home/ec2-user
+cd /home/ubuntu
 git clone ${repo_url} app
 cd app
 
@@ -58,18 +52,18 @@ cat >> docker-compose.yml << 'COMPOSEEOF'
 COMPOSEEOF
 
 # --- Start everything ---
-chown -R ec2-user:ec2-user /home/ec2-user/app
+chown -R ubuntu:ubuntu /home/ubuntu/app
 docker compose up -d --build
 
 # --- Setup nginx to serve dashboard on port 80 ---
-cat > /etc/nginx/conf.d/dashboard.conf << 'NGINXEOF'
+cat > /etc/nginx/sites-available/dashboard << 'NGINXEOF'
 server {
     listen 80;
     server_name _;
 
     # Dashboard static files
     location / {
-        root /home/ec2-user/app/dashboard;
+        root /home/ubuntu/app/dashboard;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
@@ -85,7 +79,9 @@ server {
 }
 NGINXEOF
 
+ln -sf /etc/nginx/sites-available/dashboard /etc/nginx/sites-enabled/dashboard
+rm -f /etc/nginx/sites-enabled/default
 systemctl enable nginx
-systemctl start nginx
+systemctl restart nginx
 
 echo "=== Setup complete at $(date) ==="
