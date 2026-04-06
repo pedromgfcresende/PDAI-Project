@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timezone
+from time import mktime
 
 import feedparser
 
@@ -26,7 +27,6 @@ RSS_FEEDS: dict[str, str] = {
 
 def _parse_date(entry: dict) -> datetime | None:
     if hasattr(entry, "published_parsed") and entry.published_parsed:
-        from time import mktime
         return datetime.fromtimestamp(mktime(entry.published_parsed), tz=timezone.utc)
     return None
 

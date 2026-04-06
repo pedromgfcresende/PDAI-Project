@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 
@@ -79,6 +79,5 @@ def fetch_github_trending(
 
 
 def _week_ago() -> str:
-    from datetime import timedelta
     d = datetime.now(timezone.utc) - timedelta(days=7)
     return d.strftime("%Y-%m-%d")

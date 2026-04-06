@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import httpx
 
 from agent_service.ingestion.normalize import normalize_item
@@ -45,7 +47,6 @@ def fetch_semantic_scholar(
 
                 pub_date = None
                 if paper.get("publicationDate"):
-                    from datetime import datetime
                     try:
                         pub_date = datetime.fromisoformat(paper["publicationDate"])
                     except ValueError:
