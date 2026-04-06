@@ -1,0 +1,7 @@
+{
+  "graphs": {
+    "report_pipeline": "./agent_service/agents/pipeline.py:report_pipeline"
+  },
+  "dependencies": ["."],
+  "env": ".env"
+}

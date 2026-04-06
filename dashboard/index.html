@@ -4,101 +4,635 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Trends Explorer</title>
+    <!-- marked.js for client-side markdown rendering (fallback if content_html is null) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --border: #475569;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --green: #22c55e;
+            --green-bg: #166534;
+            --yellow: #eab308;
+            --yellow-bg: #854d0e;
+            --red: #ef4444;
+            --red-bg: #7f1d1d;
+            --blue: #3b82f6;
+            --blue-hover: #2563eb;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; }
-        .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
-        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-        .subtitle { color: #94a3b8; margin-bottom: 2rem; }
-        .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
-        .card h2 { font-size: 1.25rem; margin-bottom: 0.75rem; color: #38bdf8; }
-        .score { display: inline-block; background: #334155; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.875rem; margin-right: 0.5rem; }
-        .score.high { background: #166534; }
-        .score.mid { background: #854d0e; }
-        .score.low { background: #7f1d1d; }
-        .report-content { line-height: 1.6; white-space: pre-wrap; }
-        .status { padding: 0.5rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
-        .status.ok { background: #166534; }
-        .status.error { background: #7f1d1d; }
-        button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-        button:hover { background: #2563eb; }
-        button:disabled { background: #475569; cursor: not-allowed; }
-        #reports { margin-top: 2rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ─── Layout ─────────────────────────────────── */
+
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 1.4rem; }
+        .header h1 span { color: var(--accent); }
+        .header-status {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        .status-dot.ok { background: var(--green); }
+        .status-dot.error { background: var(--red); }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* ─── Stats Bar ──────────────────────────────── */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ─── Actions Panel ──────────────────────────── */
+
+        .actions {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .actions h3 {
+            width: 100%;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        button {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        button:hover { background: var(--blue-hover); }
+        button:disabled { background: var(--border); cursor: not-allowed; opacity: 0.6; }
+        button.secondary { background: var(--surface-hover); }
+        button.secondary:hover { background: var(--border); }
+        button.danger { background: var(--red-bg); }
+        button.small { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+        input[type="date"] {
+            background: var(--surface-hover);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .separator {
+            width: 1px;
+            height: 32px;
+            background: var(--border);
+            margin: 0 0.25rem;
+        }
+
+        /* ─── Tabs ───────────────────────────────────── */
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s;
+        }
+        .tab:hover { color: var(--text); }
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── Report List ────────────────────────────── */
+
+        .report-list { display: flex; flex-direction: column; gap: 1rem; }
+
+        .report-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid transparent;
+        }
+        .report-card:hover {
+            background: var(--surface-hover);
+            border-color: var(--border);
+        }
+        .report-card.selected {
+            border-color: var(--accent);
+        }
+        .report-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .report-card h3 {
+            font-size: 1.05rem;
+            color: var(--text);
+            flex: 1;
+        }
+        .report-card-meta {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge.quality-high { background: var(--green-bg); color: var(--green); }
+        .badge.quality-mid { background: var(--yellow-bg); color: var(--yellow); }
+        .badge.quality-low { background: var(--red-bg); color: var(--red); }
+        .badge.type { background: #1e3a5f; color: var(--accent); }
+        .badge.date { background: var(--surface-hover); color: var(--text-muted); }
+
+        /* ─── Report Viewer ──────────────────────────── */
+
+        .report-viewer {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        .report-viewer.visible { display: block; }
+        .report-viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .report-viewer-actions { display: flex; gap: 0.5rem; }
+        .report-viewer-content {
+            line-height: 1.75;
+        }
+        .report-viewer-content h1 { font-size: 1.6rem; margin: 1.5rem 0 0.75rem; color: var(--accent); }
+        .report-viewer-content h2 { font-size: 1.3rem; margin: 1.25rem 0 0.5rem; color: #60a5fa; }
+        .report-viewer-content h3 { font-size: 1.1rem; margin: 1rem 0 0.5rem; }
+        .report-viewer-content p { margin-bottom: 0.75rem; }
+        .report-viewer-content ul, .report-viewer-content ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        .report-viewer-content li { margin-bottom: 0.3rem; }
+        .report-viewer-content code { background: var(--surface-hover); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+        .report-viewer-content pre { background: #0f172a; padding: 1rem; border-radius: 8px; overflow-x: auto; margin: 1rem 0; }
+        .report-viewer-content pre code { background: none; padding: 0; }
+        .report-viewer-content table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        .report-viewer-content th, .report-viewer-content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+        .report-viewer-content th { background: var(--surface-hover); font-weight: 600; }
+        .report-viewer-content blockquote { border-left: 4px solid var(--accent); padding: 0.5rem 1rem; margin: 1rem 0; background: rgba(56,189,248,0.05); }
+        .report-viewer-content strong { color: #f1f5f9; }
+
+        /* ─── Spinner ────────────────────────────────── */
+
+        .spinner {
+            display: none;
+            width: 20px; height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 0.5rem;
+        }
+        .spinner.visible { display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,23,42,0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .loading-overlay.visible { display: flex; }
+        .loading-overlay .spinner { display: inline-block; width: 40px; height: 40px; border-width: 3px; }
+        .loading-overlay p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* ─── Empty State ────────────────────────────── */
+
+        .empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        .empty p { margin-bottom: 0.5rem; }
+
+        /* ─── Toast ──────────────────────────────────── */
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 200;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .toast.visible { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--green-bg); color: var(--green); }
+        .toast.error { background: var(--red-bg); color: var(--red); }
+
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .actions { flex-direction: column; align-items: stretch; }
+            .separator { display: none; }
+        }
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <div class="header">
+        <h1><span>AI</span> Trends Explorer</h1>
+        <div class="header-status" id="header-status">
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">Connecting...</span>
+        </div>
+    </div>
+
     <div class="container">
-        <h1>AI Trends Explorer</h1>
-        <p class="subtitle">Multi-agent AI intelligence system — ESADE PDAI Project</p>
-
-        <div id="health" class="status">Checking API connection...</div>
-
-        <div class="card">
-            <h2>Actions</h2>
-            <button onclick="runPipeline('daily')">Run Daily Pipeline</button>
-            <button onclick="runPipeline('weekly')">Generate Weekly Report</button>
-            <button onclick="runPipeline('monthly')">Generate Monthly Report</button>
-            <button onclick="loadReports()">Refresh Reports</button>
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="value" id="stat-items">-</div>
+                <div class="label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-scored">-</div>
+                <div class="label">Scored Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-signals">-</div>
+                <div class="label">Active Signals</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="stat-reports">-</div>
+                <div class="label">Reports</div>
+            </div>
         </div>
 
-        <div id="reports"></div>
+        <!-- Actions -->
+        <div class="actions">
+            <h3>Pipeline Actions</h3>
+            <button onclick="runAction('/pipeline/daily', 'Running daily pipeline...')">Run Daily Pipeline</button>
+            <div class="separator"></div>
+            <input type="date" id="date-start" title="Period start">
+            <input type="date" id="date-end" title="Period end">
+            <button onclick="generateReport('weekly')">Generate Weekly Report</button>
+            <button onclick="generateReport('monthly')">Generate Monthly Report</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="weekly" onclick="switchTab('weekly')">Weekly Reports</div>
+            <div class="tab" data-tab="monthly" onclick="switchTab('monthly')">Monthly Reports</div>
+        </div>
+
+        <!-- Report List -->
+        <div id="report-list" class="report-list">
+            <div class="empty"><p>Loading reports...</p></div>
+        </div>
+
+        <!-- Report Viewer -->
+        <div id="report-viewer" class="report-viewer">
+            <div class="report-viewer-header">
+                <div>
+                    <h2 id="viewer-title"></h2>
+                    <div class="report-card-meta" id="viewer-meta" style="margin-top:0.5rem;"></div>
+                </div>
+                <div class="report-viewer-actions">
+                    <button class="small" onclick="downloadReport()">Download HTML</button>
+                    <button class="small secondary" onclick="downloadQMD()">Download QMD</button>
+                    <button class="small secondary" onclick="closeViewer()">Close</button>
+                </div>
+            </div>
+            <div class="report-viewer-content" id="viewer-content"></div>
+        </div>
     </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <p id="loading-text">Processing...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script>
         const API = 'http://localhost:8000';
+        let currentTab = 'weekly';
+        let currentReportId = null;
+        let allReports = [];
+
+        // ─── Init ────────────────────────────────────
+
+        function init() {
+            // Set default date range (last 7 days)
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            document.getElementById('date-end').value = fmt(today);
+            document.getElementById('date-start').value = fmt(weekAgo);
+
+            checkHealth();
+            loadReports();
+            setInterval(checkHealth, 30000);
+        }
+
+        function fmt(d) {
+            return d.toISOString().split('T')[0];
+        }
+
+        // ─── Health ──────────────────────────────────
 
         async function checkHealth() {
             try {
                 const res = await fetch(`${API}/health`);
                 const data = await res.json();
-                const el = document.getElementById('health');
-                el.textContent = `API: ${data.status} | DB: ${data.db_connected ? 'connected' : 'disconnected'} | Items: ${data.items_count} | Reports: ${data.reports_count}`;
-                el.className = `status ${data.db_connected ? 'ok' : 'error'}`;
+                const dot = document.getElementById('status-dot');
+                const text = document.getElementById('status-text');
+                dot.className = `status-dot ${data.db_connected ? 'ok' : 'error'}`;
+                text.textContent = data.db_connected ? 'API Connected' : 'DB Disconnected';
+
+                document.getElementById('stat-items').textContent = data.items_count ?? 0;
+                document.getElementById('stat-scored').textContent = data.scored_count ?? 0;
+                document.getElementById('stat-signals').textContent = data.signal_count ?? 0;
+                document.getElementById('stat-reports').textContent = data.reports_count ?? 0;
             } catch {
-                document.getElementById('health').textContent = 'API not reachable — start the server with: uv run uvicorn agent_service.main:app --port 8000';
-                document.getElementById('health').className = 'status error';
+                document.getElementById('status-dot').className = 'status-dot error';
+                document.getElementById('status-text').textContent = 'API Unreachable';
             }
         }
 
-        async function runPipeline(type) {
-            const endpoint = type === 'daily' ? '/pipeline/daily' : `/pipeline/${type}`;
-            try {
-                const res = await fetch(`${API}${endpoint}`, { method: 'POST' });
-                const data = await res.json();
-                alert(`Pipeline complete! Check the reports tab.`);
-                loadReports();
-            } catch (e) {
-                alert(`Error: ${e.message}`);
-            }
-        }
+        // ─── Reports ─────────────────────────────────
 
         async function loadReports() {
             try {
-                const res = await fetch(`${API}/reports?report_type=weekly&limit=5`);
-                const reports = await res.json();
-                const container = document.getElementById('reports');
-                if (!reports.length) {
-                    container.innerHTML = '<div class="card"><p>No reports yet. Run a pipeline first.</p></div>';
-                    return;
-                }
-                container.innerHTML = reports.map(r => `
-                    <div class="card">
-                        <h2>${r.title}</h2>
-                        <span class="score ${r.quality_score >= 7 ? 'high' : r.quality_score >= 5 ? 'mid' : 'low'}">
-                            Quality: ${r.quality_score?.toFixed(1) ?? 'N/A'}
-                        </span>
-                        <span class="score">Revisions: ${r.revision_count}</span>
-                        <span class="score">${r.report_type}</span>
-                        <div class="report-content">${r.content_md}</div>
-                    </div>
-                `).join('');
+                const [weeklyRes, monthlyRes] = await Promise.all([
+                    fetch(`${API}/reports?report_type=weekly&limit=20`),
+                    fetch(`${API}/reports?report_type=monthly&limit=20`),
+                ]);
+                const weekly = await weeklyRes.json();
+                const monthly = await monthlyRes.json();
+                allReports = [...weekly, ...monthly];
+                renderReportList();
             } catch {
-                document.getElementById('reports').innerHTML = '<div class="card"><p>Could not load reports.</p></div>';
+                document.getElementById('report-list').innerHTML =
+                    '<div class="empty"><p>Could not load reports. Is the API running?</p></div>';
             }
         }
 
-        checkHealth();
-        loadReports();
+        function renderReportList() {
+            const filtered = allReports.filter(r => r.report_type === currentTab);
+            const container = document.getElementById('report-list');
+
+            if (!filtered.length) {
+                container.innerHTML = `<div class="empty">
+                    <p>No ${currentTab} reports yet.</p>
+                    <p style="font-size:0.85rem">Run the pipeline and generate a report to get started.</p>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(r => `
+                <div class="report-card ${r.id === currentReportId ? 'selected' : ''}"
+                     onclick="viewReport(${r.id})">
+                    <div class="report-card-header">
+                        <h3>${esc(r.title)}</h3>
+                    </div>
+                    <div class="report-card-meta">
+                        ${qualityBadge(r.quality_score)}
+                        <span class="badge type">${r.report_type}</span>
+                        <span class="badge date">${r.period_start || '?'} &rarr; ${r.period_end || '?'}</span>
+                        <span class="badge date">Rev: ${r.revision_count}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function qualityBadge(score) {
+            if (score == null) return '<span class="badge date">No score</span>';
+            const cls = score >= 7 ? 'quality-high' : score >= 5 ? 'quality-mid' : 'quality-low';
+            return `<span class="badge ${cls}">Quality: ${score.toFixed(1)}</span>`;
+        }
+
+        // ─── View Report ─────────────────────────────
+
+        function viewReport(id) {
+            const report = allReports.find(r => r.id === id);
+            if (!report) return;
+
+            currentReportId = id;
+            renderReportList();
+
+            document.getElementById('viewer-title').textContent = report.title;
+            document.getElementById('viewer-meta').innerHTML = `
+                ${qualityBadge(report.quality_score)}
+                <span class="badge type">${report.report_type}</span>
+                <span class="badge date">${report.period_start || '?'} &rarr; ${report.period_end || '?'}</span>
+                <span class="badge date">Revisions: ${report.revision_count}</span>
+            `;
+
+            // Prefer server-rendered HTML, fall back to client-side marked.js
+            const html = report.content_html || marked.parse(report.content_md || '');
+            document.getElementById('viewer-content').innerHTML = html;
+
+            const viewer = document.getElementById('report-viewer');
+            viewer.classList.add('visible');
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeViewer() {
+            document.getElementById('report-viewer').classList.remove('visible');
+            currentReportId = null;
+            renderReportList();
+        }
+
+        // ─── Download ────────────────────────────────
+
+        function downloadReport() {
+            if (!currentReportId) return;
+            window.open(`${API}/reports/${currentReportId}/download`, '_blank');
+        }
+
+        function downloadQMD() {
+            if (!currentReportId) return;
+            window.open(`${API}/reports/${currentReportId}/qmd`, '_blank');
+        }
+
+        // ─── Tabs ────────────────────────────────────
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            closeViewer();
+            renderReportList();
+        }
+
+        // ─── Generate Report ─────────────────────────
+
+        async function generateReport(type) {
+            const start = document.getElementById('date-start').value;
+            const end = document.getElementById('date-end').value;
+            let url = `${API}/reports/generate?report_type=${type}`;
+            if (start) url += `&period_start=${start}`;
+            if (end) url += `&period_end=${end}`;
+
+            showLoading(`Generating ${type} report... This takes 30-60 seconds.`);
+            try {
+                const res = await fetch(url, { method: 'POST' });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || `HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                hideLoading();
+                toast(`${type} report generated!`, 'success');
+                switchTab(type);
+                await loadReports();
+                checkHealth();
+                viewReport(data.id);
+            } catch (e) {
+                hideLoading();
+                toast(`Error: ${e.message}`, 'error');
+            }
+        }
+
+        // ─── Pipeline Action ─────────────────────────
+
+        async function runAction(endpoint, message) {
+            showLoading(message);
+            try {
+                const res = await fetch(`${API}${endpoint}`, { method: 'POST' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                hideLoading();
+
+                let summary = 'Pipeline complete!';
+                if (data.ingestion) {
+                    const total = data.ingestion.reduce((s, r) => s + r.items_ingested, 0);
+                    summary = `Ingested ${total} items`;
+                    if (data.filtering) summary += `, scored ${data.filtering.scored}`;
+                    if (data.signals) summary += `, ${data.signals.signals_detected} signals`;
+                }
+                toast(summary, 'success');
+                checkHealth();
+            } catch (e) {
+                hideLoading();
+                toast(`Error: ${e.message}`, 'error');
+            }
+        }
+
+        // ─── UI Helpers ──────────────────────────────
+
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading').classList.add('visible');
+        }
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('visible');
+        }
+
+        function toast(message, type = 'success') {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.className = `toast ${type} visible`;
+            setTimeout(() => el.classList.remove('visible'), 4000);
+        }
+
+        function esc(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        // ─── Boot ────────────────────────────────────
+        init();
     </script>
 </body>
 </html>

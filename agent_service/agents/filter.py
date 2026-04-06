@@ -60,9 +60,22 @@ def filter_item(item: dict) -> FilterResult:
 
 
 def filter_batch(items: list[dict]) -> list[FilterResult]:
-    """Score a batch of items. Processes sequentially to respect rate limits."""
+    """Score a batch of items. Processes sequentially with rate limit handling."""
     results = []
-    for item in items:
-        result = filter_item(item)
-        results.append(result)
+    for i, item in enumerate(items):
+        for attempt in range(3):
+            try:
+                result = filter_item(item)
+                results.append(result)
+                break
+            except Exception as e:
+                if "rate" in str(e).lower() or "429" in str(e):
+                    wait = 2 ** attempt * 5
+                    print(f"[filter] Rate limited on item {i+1}, waiting {wait}s...")
+                    time.sleep(wait)
+                else:
+                    raise
+        # 1.5s delay = ~40 req/min, safely under Haiku's 50 req/min limit
+        if i < len(items) - 1:
+            time.sleep(1.5)
     return results
