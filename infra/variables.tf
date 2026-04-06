@@ -16,8 +16,8 @@ variable "instance_type" {
   default     = "t3.small"
 }
 
-variable "ssh_public_key" {
-  description = "SSH public key for EC2 access"
+variable "key_pair_name" {
+  description = "Name of an existing AWS key pair"
   type        = string
 }
 

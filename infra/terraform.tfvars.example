@@ -1,8 +1,8 @@
-aws_region     = "eu-west-1"
-instance_type  = "t3.small"
-ssh_public_key = "ssh-rsa AAAA... your-key"
-ssh_cidr       = "0.0.0.0/0"  # Restrict to your IP in production: "1.2.3.4/32"
-repo_url       = "https://github.com/your-org/PDAI-Project.git"
+aws_region    = "eu-west-1"
+instance_type = "t3.small"
+key_pair_name = "your-existing-key-name"  # Name as shown in AWS Console → EC2 → Key Pairs
+ssh_cidr      = "0.0.0.0/0"              # Restrict to your IP in production: "1.2.3.4/32"
+repo_url      = "https://github.com/your-org/PDAI-Project.git"
 
 # API Keys
 anthropic_api_key = "sk-ant-..."
