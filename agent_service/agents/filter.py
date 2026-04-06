@@ -1,6 +1,7 @@
 import json
 import re
 import time
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -24,7 +25,7 @@ def get_filter_llm() -> ChatAnthropic:
 
 
 def load_filter_prompt() -> str:
-    return PROMPT_PATH.read_text()
+    return PROMPT_PATH.read_text().format(date=date.today().isoformat())
 
 
 def filter_item(item: dict) -> FilterResult:

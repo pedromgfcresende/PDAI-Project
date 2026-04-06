@@ -16,7 +16,7 @@ Period: {period_start} to {period_end}
 
 Score each dimension from 0 to 10:
 
-1. **Grounding** — Are claims supported by the provided source items? Are there fabricated details or unsupported extrapolations?
+1. **Grounding** — Are claims supported by the provided source items? To evaluate this: identify at least 3 specific factual claims in the report (company names, metrics, funding amounts, benchmark scores, product features) and verify whether each one appears in the source items. In your feedback, list any claims you cannot trace back to a source item — these are potential hallucinations.
 2. **Coherence** — Is the report logically structured? Do sections flow naturally? Are there contradictions?
 3. **Completeness** — Does it cover the key developments from the source items? Are major items missing?
 4. **Actionability** — Can a reader act on the insights? Are recommendations specific enough to be useful?
@@ -31,6 +31,6 @@ Score each dimension from 0 to 10:
         "actionability": <0-10>
     }},
     "overall_score": <average of the 4 scores>,
-    "feedback": "<specific, constructive feedback for improvement — be direct about what's wrong and how to fix it>",
+    "feedback": "<specific, actionable feedback. You MUST include: (1) at least one exact sentence or claim from the report that should be changed, and (2) a concrete rewrite suggestion. Vague feedback like 'could be more actionable' is not acceptable.>",
     "approved": <true if overall_score >= 7, false otherwise>
 }}

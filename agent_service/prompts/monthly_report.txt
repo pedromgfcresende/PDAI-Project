@@ -18,6 +18,8 @@ Write a deep analysis covering the period {period_start} to {period_end}.
 
 ## Guidelines
 
+- CRITICAL: Only reference developments from the source items provided below. Do not introduce facts, companies, metrics, funding amounts, or benchmark scores from your own knowledge. Every claim must be traceable to a specific source item. If a section has insufficient material, merge it with a related section or omit it.
+- Cite sources inline where you reference specific facts, formatted as: [Title](URL).
 - This is a deep report — be thorough but avoid filler.
 - Connect dots: relate individual events to broader patterns.
 - Distinguish between signal and noise explicitly.
