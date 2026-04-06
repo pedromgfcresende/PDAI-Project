@@ -2117,10 +2117,6 @@
                     <div class="highlight-value">7/10</div>
                     <div class="highlight-label">Minimum quality score before publishing</div>
                 </div>
-                <div class="highlight-card">
-                    <div class="highlight-value">~€20</div>
-                    <div class="highlight-label">Estimated monthly API cost at full use</div>
-                </div>
             </div>
         </div>
 
@@ -2268,24 +2264,17 @@
 
             <div class="quality-thresholds">
                 <div class="quality-threshold">
-                    <div class="threshold-ring" style="border-color:#34d399;color:#34d399">8.5</div>
+                    <div class="threshold-ring" style="border-color:#34d399;color:#34d399">7+</div>
                     <div>
-                        <div class="threshold-label" style="color:#34d399">≥ 7.0 — Published</div>
-                        <div class="threshold-desc">Report meets quality bar, stored and displayed immediately.</div>
+                        <div class="threshold-label" style="color:#34d399">Score ≥ 7.0 — Approved</div>
+                        <div class="threshold-desc">Report meets quality bar and is published immediately.</div>
                     </div>
                 </div>
                 <div class="quality-threshold">
-                    <div class="threshold-ring" style="border-color:#fcd34d;color:#fcd34d">6.0</div>
+                    <div class="threshold-ring" style="border-color:#f87171;color:#f87171">&lt;7</div>
                     <div>
-                        <div class="threshold-label" style="color:#fcd34d">5.0 – 6.9 — Revised</div>
-                        <div class="threshold-desc">Critic feedback sent back to writer. Revised up to 2 times.</div>
-                    </div>
-                </div>
-                <div class="quality-threshold">
-                    <div class="threshold-ring" style="border-color:#f87171;color:#f87171">4.0</div>
-                    <div>
-                        <div class="threshold-label" style="color:#f87171">&lt; 5.0 — Published with warning</div>
-                        <div class="threshold-desc">Published after max retries with a low-quality flag.</div>
+                        <div class="threshold-label" style="color:#f87171">Score &lt; 7.0 — Revised</div>
+                        <div class="threshold-desc">Critic sends feedback to the writer for revision. Up to 2 revision attempts before force-publishing.</div>
                     </div>
                 </div>
             </div>
@@ -2384,53 +2373,6 @@
                     <div class="stack-card-name">PostgreSQL + pgvector</div>
                     <div class="stack-card-role">Stores ingested items, embeddings (384-dim), scored signals, and all generated reports. Runs in Docker.</div>
                     <span class="stack-tag infra">Database</span>
-                </div>
-            </div>
-        </div>
-
-        <hr class="about-divider">
-
-        <!-- FAQ -->
-        <div class="about-section">
-            <div class="about-section-label">FAQ</div>
-            <h2 class="about-section-heading">Common Questions</h2>
-            <p class="about-section-desc">Answers to the most frequently encountered issues when setting up and running the system.</p>
-
-            <div class="faq-list">
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        Why use a different model for the critic?
-                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="faq-answer">Same-model review tends to approve its own mistakes — Claude reviewing its own output will often miss the same gaps it introduced. By using Groq Llama 3.3 70B (a completely different model family and architecture), the critic brings a genuinely independent perspective and catches errors that Claude would overlook.</div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        I'm hitting 429 rate limit errors on Claude Haiku.
-                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="faq-answer">The filter pipeline has a built-in 1.5s delay between calls to stay under Haiku's 50 req/min limit. If you still hit limits, the retry logic handles it automatically — just wait a minute. To score fewer items at once, use <code>curl -X POST "http://localhost:8000/filter?limit=10"</code> instead of the default.</div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        The Groq critic fails — what's the fallback?
-                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="faq-answer">If Groq hits a 429 rate limit, the critic agent automatically falls back to Gemini 2.0 Flash (free tier). This requires <code>GOOGLE_AI_API_KEY</code> to be set in your <code>.env</code> file. If neither is available, the report is published after the synthesis step with a note that critic review was skipped.</div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        The dashboard shows "Unreachable" — what's wrong?
-                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="faq-answer">The API server isn't running. Open a terminal, navigate to the project folder, and run <code>uv run uvicorn agent_service.main:app --reload --port 8000</code>. Keep that terminal open while using the dashboard. Also make sure Docker is running — the API needs the PostgreSQL container to connect to the database.</div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        How much does it cost to run?
-                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="faq-answer">Roughly €20–25/month at full daily usage: ~€2–3 for Haiku filtering, ~€8–12 for Sonnet weekly briefings, ~€3–4 for monthly reports via the Batch API (50% discount). The critic (Groq Llama) and embeddings (all-MiniLM-L6-v2, runs locally) are both free. Gemini Flash fallback is also free tier.</div>
                 </div>
             </div>
         </div>
