@@ -1,0 +1,13 @@
+aws_region     = "eu-west-1"
+instance_type  = "t3.small"
+ssh_public_key = "ssh-rsa AAAA... your-key"
+ssh_cidr       = "0.0.0.0/0"  # Restrict to your IP in production: "1.2.3.4/32"
+repo_url       = "https://github.com/your-org/PDAI-Project.git"
+
+# API Keys
+anthropic_api_key = "sk-ant-..."
+groq_api_key      = "gsk_..."
+google_ai_api_key = ""
+github_token      = ""
+langchain_api_key = ""
+db_password       = "changeme"
