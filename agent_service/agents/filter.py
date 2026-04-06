@@ -47,7 +47,7 @@ def filter_item(item: dict) -> FilterResult:
         raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
         data = json.loads(raw)
         return FilterResult(**data)
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         # Graceful fallback: assign low scores so item doesn't get lost
         return FilterResult(
             source_id=item["source_id"],
