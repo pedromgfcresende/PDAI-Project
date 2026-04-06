@@ -1,10 +1,9 @@
+from datetime import datetime
+
 import httpx
-from dotenv import load_dotenv
 
 from agent_service.ingestion.normalize import normalize_item
 from agent_service.models import IngestedItem
-
-load_dotenv()
 
 BASE_URL = "https://api.semanticscholar.org/graph/v1"
 SEARCH_QUERIES = [
@@ -48,7 +47,6 @@ def fetch_semantic_scholar(
 
                 pub_date = None
                 if paper.get("publicationDate"):
-                    from datetime import datetime
                     try:
                         pub_date = datetime.fromisoformat(paper["publicationDate"])
                     except ValueError:

@@ -1,13 +1,11 @@
 import re
 from datetime import datetime, timezone
+from time import mktime
 
 import feedparser
-from dotenv import load_dotenv
 
 from agent_service.ingestion.normalize import normalize_item
 from agent_service.models import IngestedItem
-
-load_dotenv()
 
 RSS_FEEDS: dict[str, str] = {
     # AI news outlets
@@ -29,7 +27,6 @@ RSS_FEEDS: dict[str, str] = {
 
 def _parse_date(entry: dict) -> datetime | None:
     if hasattr(entry, "published_parsed") and entry.published_parsed:
-        from time import mktime
         return datetime.fromtimestamp(mktime(entry.published_parsed), tz=timezone.utc)
     return None
 

@@ -2,14 +2,11 @@ import json
 import re
 from pathlib import Path
 
-from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
 from agent_service.config import settings
 from agent_service.models import CriticResult, CriticScores
-
-load_dotenv()
 
 PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "critic.txt"
 

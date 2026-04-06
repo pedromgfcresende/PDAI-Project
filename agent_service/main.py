@@ -2,7 +2,6 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import markdown
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from langsmith import traceable
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,8 +19,6 @@ from agent_service.ingestion.semantic_scholar import fetch_semantic_scholar
 from agent_service.models import IngestResponse, ReportResponse, ReportType
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
-
-load_dotenv()
 
 app = FastAPI(
     title="AI Trends Explorer",
@@ -100,7 +97,7 @@ def ingest(source: str):
         if result is not None:
             ingested += 1
 
-    return IngestResponse(source=source, items_ingested=ingested, items_filtered=0)
+    return IngestResponse(source=source, items_ingested=ingested)
 
 
 @app.post("/ingest", response_model=list[IngestResponse])

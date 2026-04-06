@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS items (
     id              BIGSERIAL PRIMARY KEY,
-    source          TEXT NOT NULL,           -- 'arxiv', 'semantic_scholar', 'rss', 'github', 'huggingface'
+    source          TEXT NOT NULL,           -- 'arxiv', 'semantic_scholar', 'rss', 'github'
     source_id       TEXT UNIQUE NOT NULL,    -- dedup key (e.g. arxiv paper id, URL hash)
     title           TEXT NOT NULL,
     summary         TEXT,

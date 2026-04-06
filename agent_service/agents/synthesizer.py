@@ -1,13 +1,9 @@
-import json
 from pathlib import Path
 
-from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 
 from agent_service.config import settings
 from agent_service.models import SynthesisRequest, SynthesisResult
-
-load_dotenv()
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 

@@ -4,14 +4,9 @@ from datetime import date, datetime
 import numpy as np
 import psycopg2
 import psycopg2.extras
-from dotenv import load_dotenv
 from pgvector.psycopg2 import register_vector
 
 from agent_service.config import settings
-
-load_dotenv()
-
-psycopg2.extras.register_uuid()
 
 
 def get_connection():

@@ -1,13 +1,10 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
-from dotenv import load_dotenv
 
 from agent_service.config import settings
 from agent_service.ingestion.normalize import normalize_item
 from agent_service.models import IngestedItem
-
-load_dotenv()
 
 AI_TOPICS = [
     "machine-learning",
@@ -82,6 +79,5 @@ def fetch_github_trending(
 
 
 def _week_ago() -> str:
-    from datetime import timedelta
     d = datetime.now(timezone.utc) - timedelta(days=7)
     return d.strftime("%Y-%m-%d")

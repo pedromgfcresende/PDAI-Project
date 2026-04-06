@@ -2,13 +2,10 @@ import json
 import re
 from collections import Counter
 
-from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 
 from agent_service.config import settings
 from agent_service.models import TrendSignal
-
-load_dotenv()
 
 SIGNAL_PROMPT = """Analyze the following batch of AI/ML items and identify the TOP 5 most significant trend signals.
 A signal is a pattern across multiple items that suggests an emerging, accelerating, or disruptive trend.

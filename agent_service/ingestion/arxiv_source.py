@@ -1,10 +1,7 @@
 import arxiv
-from dotenv import load_dotenv
 
 from agent_service.ingestion.normalize import normalize_item
 from agent_service.models import IngestedItem
-
-load_dotenv()
 
 CATEGORIES = ["cs.AI", "cs.LG", "cs.CL"]
 MAX_RESULTS_PER_CATEGORY = 15

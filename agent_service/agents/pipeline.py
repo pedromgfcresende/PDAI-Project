@@ -7,14 +7,11 @@ Flow:
 
 from typing import TypedDict
 
-from dotenv import load_dotenv
 from langgraph.graph import END, StateGraph
 
 from agent_service.agents.critic import critique
 from agent_service.agents.synthesizer import synthesize
 from agent_service.models import ReportType, SynthesisRequest
-
-load_dotenv()
 
 MAX_RETRIES = 2
 

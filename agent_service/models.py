@@ -103,7 +103,6 @@ class IngestResponse(BaseModel):
     """Response from the ingestion endpoint."""
     source: str
     items_ingested: int
-    items_filtered: int
 
 
 class ReportResponse(BaseModel):
@@ -119,10 +118,3 @@ class ReportResponse(BaseModel):
     period_start: date | None = None
     period_end: date | None = None
     created_at: datetime | None = None
-
-
-class HealthResponse(BaseModel):
-    status: str = "ok"
-    db_connected: bool
-    items_count: int = 0
-    reports_count: int = 0

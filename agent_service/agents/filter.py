@@ -4,13 +4,10 @@ import time
 from datetime import date
 from pathlib import Path
 
-from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 
 from agent_service.config import settings
 from agent_service.models import FilterResult
-
-load_dotenv()
 
 PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "filter.txt"
 
@@ -50,7 +47,7 @@ def filter_item(item: dict) -> FilterResult:
         raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
         data = json.loads(raw)
         return FilterResult(**data)
-    except (json.JSONDecodeError, Exception) as e:
+    except Exception as e:
         # Graceful fallback: assign low scores so item doesn't get lost
         return FilterResult(
             source_id=item["source_id"],

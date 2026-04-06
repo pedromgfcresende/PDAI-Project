@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Trends Explorer — Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 40px;
+    color: #1a1a2e;
+    -webkit-font-smoothing: antialiased;
+  }
+  .title-bar { text-align: center; margin-bottom: 36px; }
+  .title-bar h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+  .title-bar .subtitle { font-size: 14px; color: #64748b; margin-top: 4px; }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  .box { border-radius: 12px; padding: 18px; position: relative; }
+  .box-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    position: absolute; top: -9px; left: 16px; padding: 2px 10px; border-radius: 4px; z-index: 2;
+  }
+
+  .v-arrow { display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
+  .v-arrow .v-label {
+    font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;
+  }
+
+  /* Frames */
+  .frame-ec2 { background: #f8fafc; border: 2px solid #94a3b8; border-radius: 14px; padding: 30px 20px 20px; }
+  .frame-ec2 > .box-label { background: #64748b; color: white; }
+  .frame-docker { background: #eff6ff; border: 2px solid #3b82f6; padding: 28px 18px 18px; border-radius: 12px; }
+  .frame-docker > .box-label { background: #3b82f6; color: white; }
+  .frame-api { background: #fefce8; border: 2px solid #ca8a04; padding: 28px 18px 18px; border-radius: 12px; }
+  .frame-api > .box-label { background: #ca8a04; color: white; }
+
+  /* Boxes */
+  .box-browser { background: white; border: 2px solid #6366f1; }
+  .box-browser > .box-label { background: #6366f1; color: white; }
+  .box-ingest { background: #e0f7fa; border: 2px solid #00acc1; }
+  .box-ingest > .box-label { background: #00acc1; color: white; }
+  .box-agent { background: #f5f3ff; border: 2px solid #7c3aed; }
+  .box-agent > .box-label { background: #7c3aed; color: white; }
+  .box-loop { background: #fdf2f8; border: 2.5px solid #db2777; padding: 30px 24px 24px; border-radius: 12px; }
+  .box-loop > .box-label { background: #db2777; color: white; }
+  .box-synth { background: #fce7f3; border: 2px solid #ec4899; border-radius: 12px; padding: 20px; }
+  .box-critic { background: #ede9fe; border: 2px solid #8b5cf6; border-radius: 12px; padding: 20px; }
+  .box-delivery { background: #ecfdf5; border: 2px solid #10b981; }
+  .box-delivery > .box-label { background: #10b981; color: white; }
+  .box-db { background: #e0f2fe; border: 2.5px solid #0284c7; border-radius: 12px; }
+  .box-db > .box-label { background: #0284c7; color: white; }
+
+  .model-tag { font-size: 10px; font-weight: 600; display: inline-block; padding: 2px 7px; border-radius: 3px; }
+  .tag-haiku { background: #dbeafe; color: #1e40af; }
+  .tag-sonnet { background: #fce7f3; color: #be185d; }
+  .tag-groq { background: #ede9fe; color: #6d28d9; }
+  .tag-gemini { background: #d1fae5; color: #065f46; }
+  .tag-embed { background: #e0f2fe; color: #0369a1; }
+
+  /* Ingestion */
+  .ingest-steps { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+  .ingest-step { flex: 1; background: #e8f5e9; border: 1.5px solid #81c784; border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .ingest-step .step-name { font-weight: 700; font-size: 12px; color: #2e7d32; }
+  .ingest-step .step-desc { font-size: 10px; color: #475569; margin-top: 3px; }
+  .ingest-arrow { color: #94a3b8; font-size: 18px; flex-shrink: 0; }
+
+  /* Agent */
+  .agent-row { display: flex; align-items: flex-start; gap: 12px; margin-top: 6px; }
+  .agent-num { width: 26px; height: 26px; border-radius: 50%; background: #7c3aed; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+  .agent-name { font-weight: 700; font-size: 14px; color: #5b21b6; }
+  .agent-desc { font-size: 12px; color: #475569; line-height: 1.5; margin-top: 3px; }
+
+  /* Loop */
+  .loop-grid { display: grid; grid-template-columns: 1fr 90px 1fr; gap: 0; align-items: center; margin-top: 12px; }
+  .actor-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
+  .actor-desc { font-size: 12px; color: #475569; line-height: 1.7; }
+  .loop-arrows-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .loop-arr { font-size: 11px; font-weight: 600; color: #64748b; text-align: center; line-height: 1.2; }
+  .loop-arr .sym { font-size: 24px; color: #db2777; display: block; }
+  .decisions { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+  .dec { font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 6px; white-space: nowrap; }
+  .dec-yes { background: #dcfce7; color: #166534; border: 1.5px solid #86efac; }
+  .dec-rev { background: #fef3c7; color: #92400e; border: 1.5px solid #fcd34d; }
+  .dec-force { background: #fee2e2; color: #991b1b; border: 1.5px solid #fca5a5; }
+
+  /* Delivery */
+  .delivery-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+  .del-card { background: white; border: 1.5px solid #a7f3d0; border-radius: 8px; padding: 10px 12px; text-align: center; }
+  .del-card .del-name { font-weight: 700; font-size: 13px; color: #047857; }
+  .del-card .del-desc { font-size: 10px; color: #64748b; margin-top: 3px; line-height: 1.4; }
+
+  /* DB table tags */
+  .db-table-tag {
+    background: white; border: 1.5px solid #7dd3fc; border-radius: 8px;
+    padding: 8px 14px; font-size: 13px; font-weight: 700; color: #0369a1; text-align: center;
+  }
+  .db-table-tag span { font-weight: 400; font-size: 10px; color: #64748b; display: block; margin-top: 2px; }
+
+  /* Layout: FastAPI | arrows | PostgreSQL */
+  .docker-layout {
+    display: grid;
+    grid-template-columns: 1fr 250px 240px;
+    gap: 0;
+    position: relative;
+  }
+  .arrow-zone { position: relative; }
+  .pipe-col { display: flex; flex-direction: column; gap: 0; }
+</style>
+</head>
+<body>
+
+<div class="title-bar">
+  <h1>AI Trends Explorer — System Architecture</h1>
+  <div class="subtitle">Multi-Agent AI Research Intelligence System</div>
+</div>
+
+<div class="container">
+
+  <!-- Browser -->
+  <div class="box box-browser" style="margin-bottom: 8px;">
+    <div class="box-label">User's Browser</div>
+    <div style="font-weight:600; font-size:14px; margin-top:2px;">Dashboard</div>
+    <div style="font-size:12px; color:#475569; margin-top: 2px;">Static HTML + vanilla JS — live stats, pipeline controls, semantic search, report viewer</div>
+  </div>
+
+  <div class="v-arrow">
+    <svg width="20" height="32"><line x1="10" y1="0" x2="10" y2="22" stroke="#94a3b8" stroke-width="2"/><polygon points="4,20 10,32 16,20" fill="#94a3b8"/></svg>
+    <span class="v-label">HTTP :80</span>
+  </div>
+
+  <!-- EC2 -->
+  <div class="box frame-ec2">
+    <div class="box-label">EC2 Instance (t3.small)</div>
+
+    <div style="font-size: 12px; color: #475569; margin-bottom: 14px; padding: 8px 12px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px;">
+      <b style="color:#166534;">nginx</b> on <b>:80</b> — serves static dashboard, proxies API routes to <b>FastAPI :8000</b>
+    </div>
+
+    <!-- Docker Compose -->
+    <div class="box frame-docker">
+      <div class="box-label">Docker Compose</div>
+
+      <div class="docker-layout">
+
+        <!-- FastAPI Container -->
+        <div>
+          <div class="box frame-api">
+            <div class="box-label">FastAPI Container (:8000)</div>
+
+            <!-- Ingestion -->
+            <div class="box box-ingest" id="s-ingest" style="margin-bottom: 0;">
+              <div class="box-label">Ingestion Pipeline</div>
+              <div style="font-size: 12px; color: #475569; margin-top: 2px; margin-bottom: 10px; line-height: 1.6;">
+                Fetches ~265 items/run from external APIs:<br>
+                <b style="color:#c2410c;">arXiv</b> ·
+                <b style="color:#c2410c;">RSS</b> (10 feeds) ·
+                <b style="color:#c2410c;">GitHub</b> ·
+                <b style="color:#c2410c;">Semantic Scholar</b>
+              </div>
+              <div class="ingest-steps">
+                <div class="ingest-step">
+                  <div class="step-name">Normalize</div>
+                  <div class="step-desc">Common schema, UTC</div>
+                </div>
+                <div class="ingest-arrow">→</div>
+                <div class="ingest-step">
+                  <div class="step-name">Embed</div>
+                  <div class="step-desc"><span class="model-tag tag-embed">MiniLM-L6</span> 384d</div>
+                </div>
+                <div class="ingest-arrow">→</div>
+                <div class="ingest-step">
+                  <div class="step-name">Dedup</div>
+                  <div class="step-desc">SHA256 source_id</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="v-arrow">
+              <svg width="20" height="28"><line x1="10" y1="0" x2="10" y2="18" stroke="#94a3b8" stroke-width="2"/><polygon points="5,17 10,28 15,17" fill="#94a3b8"/></svg>
+            </div>
+
+            <!-- Filter -->
+            <div class="box box-agent" id="s-filter" style="margin-bottom: 0;">
+              <div class="box-label">Stage 1</div>
+              <div class="agent-row">
+                <div class="agent-num">1</div>
+                <div>
+                  <div class="agent-name">Filter Agent <span class="model-tag tag-haiku">Claude Haiku 4.5</span></div>
+                  <div class="agent-desc">Scores <b>relevance</b> (0–1) + <b>novelty</b> (0–1) + assigns <b>topic tags</b></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="v-arrow">
+              <svg width="20" height="28"><line x1="10" y1="0" x2="10" y2="18" stroke="#94a3b8" stroke-width="2"/><polygon points="5,17 10,28 15,17" fill="#94a3b8"/></svg>
+            </div>
+
+            <!-- Signals -->
+            <div class="box box-agent" id="s-signals" style="margin-bottom: 0;">
+              <div class="box-label">Stage 2</div>
+              <div class="agent-row">
+                <div class="agent-num">2</div>
+                <div>
+                  <div class="agent-name">Signal Detector <span class="model-tag tag-haiku">Claude Haiku 4.5</span></div>
+                  <div class="agent-desc">Identifies <b>top 5 trend signals</b>: emergence · acceleration · disruption</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="v-arrow">
+              <svg width="20" height="28"><line x1="10" y1="0" x2="10" y2="18" stroke="#94a3b8" stroke-width="2"/><polygon points="5,17 10,28 15,17" fill="#94a3b8"/></svg>
+            </div>
+
+            <!-- Writer-Critic Loop -->
+            <div class="box box-loop" id="s-loop">
+              <div class="box-label">Stage 3 — Writer-Critic Loop (LangGraph StateGraph)</div>
+              <div class="loop-grid">
+                <div class="box-synth">
+                  <div class="actor-name" style="color:#be185d;">Synthesis Agent</div>
+                  <div><span class="model-tag tag-sonnet">Claude Sonnet 4.5</span></div>
+                  <div class="actor-desc" style="margin-top:8px;">
+                    Writes report from items + signals.<br>
+                    Cites every claim as<br><b>[Title](URL)</b>.<br>
+                    On revision:<br>addresses critic feedback.
+                  </div>
+                </div>
+                <div class="loop-arrows-col">
+                  <div class="loop-arr"><span class="sym">→</span>draft</div>
+                  <div class="loop-arr"><span class="sym">←</span>feedback</div>
+                </div>
+                <div class="box-critic">
+                  <div class="actor-name" style="color:#6d28d9;">Critic Agent</div>
+                  <div><span class="model-tag tag-groq">Groq Llama 3.3 70B</span></div>
+                  <div class="actor-desc" style="margin-top:8px;">
+                    <b>Different model family</b> from writer.<br>
+                    <b>Scores:</b> Grounding, Coherence, Completeness, Actionability<br><br>
+                    Fallback: <span class="model-tag tag-gemini">Gemini 2.0 Flash</span>
+                  </div>
+                </div>
+              </div>
+              <div class="decisions">
+                <div class="dec dec-yes">✓ score ≥ 7 → Publish</div>
+                <div class="dec dec-rev">↻ &lt; 7 → Revise (max 2x)</div>
+                <div class="dec dec-force">⚠ retries ≥ 2 → Force</div>
+              </div>
+            </div>
+
+          </div><!-- end FastAPI container -->
+        </div>
+
+        <!-- Arrow zone -->
+        <div class="arrow-zone" id="arrowZone">
+          <svg id="svgArrows" style="width:100%; height:100%; position:absolute; top:0; left:0;"></svg>
+        </div>
+
+        <!-- PostgreSQL Container -->
+        <div style="display:flex; align-items:stretch;">
+          <div class="box box-db" style="width:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; gap:14px; padding: 24px 18px;" id="dbBox">
+            <div class="box-label">PostgreSQL Container (:5432)</div>
+
+            <div style="font-size: 18px; font-weight: 800; color: #0369a1; margin-top: 8px;">PostgreSQL 17</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0369a1; margin-top: -8px;">+ pgvector</div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+              <div class="db-table-tag">items<span>vector(384) + scores + topics</span></div>
+              <div class="db-table-tag">signals<span>trends + strength + evidence</span></div>
+              <div class="db-table-tag">reports<span>markdown + html + quality</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end docker-layout -->
+
+    </div><!-- Docker -->
+
+    <div class="v-arrow" style="margin-top: 14px;">
+      <svg width="20" height="28"><line x1="10" y1="0" x2="10" y2="18" stroke="#94a3b8" stroke-width="2"/><polygon points="5,17 10,28 15,17" fill="#94a3b8"/></svg>
+    </div>
+
+    <!-- Delivery -->
+    <div class="box box-delivery" style="margin-top: 4px;">
+      <div class="box-label">Delivery</div>
+      <div class="delivery-row">
+        <div class="del-card">
+          <div class="del-name">Web Dashboard</div>
+          <div class="del-desc">Live stats, reports, signals, semantic search</div>
+        </div>
+        <div class="del-card">
+          <div class="del-name">Email (SES)</div>
+          <div class="del-desc">Styled HTML reports weekly/monthly</div>
+        </div>
+        <div class="del-card">
+          <div class="del-name">Export</div>
+          <div class="del-desc">Download HTML or Quarto (.qmd)</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- EC2 -->
+
+</div>
+
+<script>
+function drawArrows() {
+  const svg = document.getElementById('svgArrows');
+  const zone = document.getElementById('arrowZone');
+  const zoneRect = zone.getBoundingClientRect();
+
+  svg.setAttribute('width', zoneRect.width);
+  svg.setAttribute('height', zoneRect.height);
+  svg.innerHTML = '';
+
+  const stages = [
+    { id: 's-ingest',  arrows: [{ dir: 'write', label: 'write items + embeddings', offset: 0 }] },
+    { id: 's-filter',  arrows: [{ dir: 'read', label: 'read unscored items', offset: -12 }, { dir: 'write', label: 'write scores + topics', offset: 12 }] },
+    { id: 's-signals', arrows: [{ dir: 'read', label: 'read scored items (7d)', offset: -12 }, { dir: 'write', label: 'write signals', offset: 12 }] },
+    { id: 's-loop',    arrows: [{ dir: 'read', label: 'read items + signals', offset: -12 }, { dir: 'write', label: 'write report + quality', offset: 12 }] },
+  ];
+
+  const x1 = 10;
+  const x2 = zoneRect.width - 10;
+  const midX = zoneRect.width / 2;
+
+  stages.forEach(stage => {
+    const el = document.getElementById(stage.id);
+    if (!el) return;
+    const elRect = el.getBoundingClientRect();
+    const centerY = elRect.top + elRect.height / 2 - zoneRect.top;
+
+    stage.arrows.forEach(arrow => {
+      const y = centerY + arrow.offset;
+      const isWrite = arrow.dir === 'write';
+      const color = isWrite ? '#dc2626' : '#059669';
+
+      // Line
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y);
+      line.setAttribute('stroke', color);
+      line.setAttribute('stroke-width', '2');
+      if (!isWrite) line.setAttribute('stroke-dasharray', '6,4');
+      svg.appendChild(line);
+
+      // Arrowhead
+      const head = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      if (isWrite) {
+        head.setAttribute('points', `${x2-9},${y-5} ${x2},${y} ${x2-9},${y+5}`);
+      } else {
+        head.setAttribute('points', `${x1+9},${y-5} ${x1},${y} ${x1+9},${y+5}`);
+      }
+      head.setAttribute('fill', color);
+      svg.appendChild(head);
+
+      // Label bg
+      const labelLen = arrow.label.length * 5.8 + 16;
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('x', midX - labelLen / 2);
+      bg.setAttribute('y', y - 9);
+      bg.setAttribute('width', labelLen);
+      bg.setAttribute('height', 16);
+      bg.setAttribute('fill', '#eff6ff');
+      bg.setAttribute('rx', '4');
+      svg.appendChild(bg);
+
+      // Label text
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', midX);
+      text.setAttribute('y', y + 4);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('font-size', '10');
+      text.setAttribute('font-weight', '700');
+      text.setAttribute('fill', color);
+      text.setAttribute('font-family', "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif");
+      text.textContent = arrow.label;
+      svg.appendChild(text);
+    });
+  });
+}
+
+window.addEventListener('load', () => setTimeout(drawArrows, 250));
+window.addEventListener('resize', drawArrows);
+</script>
+
+</body>
+</html>
