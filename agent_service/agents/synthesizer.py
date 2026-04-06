@@ -14,7 +14,7 @@ PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 
 def get_synthesis_llm() -> ChatAnthropic:
     return ChatAnthropic(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-haiku-4-5-20251001",  # TODO: upgrade to Sonnet when API key supports it
         api_key=settings.anthropic_api_key,
         max_tokens=4096,
         temperature=0.3,
@@ -32,8 +32,8 @@ def _format_items(items: list[dict]) -> str:
     for i, item in enumerate(items, 1):
         lines.append(
             f"{i}. [{item.get('source', '?')}] {item['title']}\n"
-            f"   Score: {item.get('relevance_score', '?')} | "
-            f"Topics: {', '.join(item.get('topics', []))}\n"
+            f"   Topics: {', '.join(item.get('topics', []))}\n"
+            f"   URL: {item.get('url', 'N/A')}\n"
             f"   {item.get('summary', '')[:300]}\n"
         )
     return "\n".join(lines)

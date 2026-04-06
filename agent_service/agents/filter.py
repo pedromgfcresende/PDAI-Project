@@ -1,6 +1,5 @@
 import json
 import re
-import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -46,12 +45,8 @@ def filter_item(item: dict) -> FilterResult:
     ])
 
     try:
-        text = response.content
-        # Strip markdown code blocks if present
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
-        if match:
-            text = match.group(1)
-        data = json.loads(text)
+        raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
+        data = json.loads(raw)
         return FilterResult(**data)
     except (json.JSONDecodeError, Exception) as e:
         # Graceful fallback: assign low scores so item doesn't get lost

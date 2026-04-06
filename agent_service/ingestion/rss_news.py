@@ -13,15 +13,17 @@ RSS_FEEDS: dict[str, str] = {
     # AI news outlets
     "techcrunch_ai": "https://techcrunch.com/category/artificial-intelligence/feed/",
     "venturebeat_ai": "https://venturebeat.com/category/ai/feed/",
-    "ars_ai": "https://feeds.arstechnica.com/arstechnica/technology-lab",
     "mit_tech_review": "https://www.technologyreview.com/feed/",
     # Company blogs
     "google_ai": "https://blog.google/technology/ai/rss/",
     "openai_blog": "https://openai.com/blog/rss.xml",
     "anthropic_blog": "https://www.anthropic.com/rss.xml",
     "meta_ai": "https://ai.meta.com/blog/rss/",
-    # HuggingFace
     "huggingface_blog": "https://huggingface.co/blog/feed.xml",
+    # Funding & deals
+    "crunchbase_news": "https://news.crunchbase.com/feed",
+    # Security & risk
+    "securityweek": "https://feeds.feedburner.com/securityweek",
 }
 
 
@@ -34,7 +36,7 @@ def _parse_date(entry: dict) -> datetime | None:
 
 def fetch_rss_news(
     feeds: dict[str, str] | None = None,
-    max_per_feed: int = 20,
+    max_per_feed: int = 15,
 ) -> list[IngestedItem]:
     """Fetch articles from RSS feeds."""
     feeds = feeds or RSS_FEEDS

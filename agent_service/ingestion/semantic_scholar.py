@@ -13,7 +13,7 @@ SEARCH_QUERIES = [
     "machine learning",
     "neural networks",
 ]
-MAX_RESULTS = 30
+MAX_RESULTS = 10
 
 
 def fetch_semantic_scholar(

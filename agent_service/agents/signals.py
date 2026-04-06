@@ -63,11 +63,9 @@ def detect_signals(items: list[dict]) -> list[TrendSignal]:
     response = llm.invoke([{"role": "user", "content": prompt}])
 
     try:
-        text = response.content
-        match = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
-        if match:
-            text = match.group(1)
-        signals_data = json.loads(text)
+        import re
+        raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
+        signals_data = json.loads(raw)
         signals = []
         for s in signals_data:
             # Map evidence indices to actual item IDs

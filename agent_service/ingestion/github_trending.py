@@ -21,7 +21,7 @@ AI_TOPICS = [
 
 def fetch_github_trending(
     topics: list[str] | None = None,
-    max_per_topic: int = 10,
+    max_per_topic: int = 5,
 ) -> list[IngestedItem]:
     """Fetch trending AI repos from GitHub via the search API."""
     topics = topics or AI_TOPICS
