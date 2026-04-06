@@ -69,7 +69,7 @@ All free APIs:
 |-----------|-----------|
 | Agent Framework | LangGraph + LangChain |
 | Backend API | FastAPI |
-| Workflow Engine | n8n (self-hosted, optional) |
+| Scheduling | AWS Lambda + EventBridge |
 | Database | PostgreSQL + pgvector (Docker) |
 | Embeddings | all-MiniLM-L6-v2 (local, CPU) |
 | Observability | LangSmith |
@@ -92,16 +92,13 @@ All free APIs:
 git clone https://github.com/<your-username>/PDAI-Project.git
 cd PDAI-Project
 
-# Set up centralized venv with direnv (keeps .venv outside OneDrive)
-echo "export UV_PROJECT_ENVIRONMENT=\"\$HOME/.venvs/$(basename $PWD)\"" > .envrc && direnv allow
-
 # Install dependencies
 uv sync
 
 # Copy environment variables and add your API keys
 cp .env.example .env
 
-# Start local infrastructure (Postgres + n8n)
+# Start local infrastructure (Postgres)
 docker compose up -d
 
 # Run the agent service
@@ -115,10 +112,10 @@ open dashboard/index.html
 
 ```
 PDAI-Project/
-├── docker-compose.yml             # PostgreSQL + n8n
-├── Dockerfile                     # Agent service container
-├── .env.example                   # Environment template
-├── pyproject.toml                 # Dependencies
+├── docker-compose.yml            # PostgreSQL
+├── Dockerfile                    # Agent service container
+├── .env.example                  # Environment template
+├── pyproject.toml                # Dependencies
 ├── uv.lock                       # Lock file
 ├── init-db.sql                   # Database schema
 ├── langgraph.json                # LangGraph config
@@ -142,7 +139,7 @@ PDAI-Project/
 │   │   └── normalize.py
 │   └── prompts/                  # System prompts for each agent
 │
-├── n8n-workflows/                # Scheduling workflows (optional)
+├── lambda-triggers/              # AWS Lambda cron functions + SES email
 │
 └── dashboard/
     └── index.html                # Static dashboard
@@ -175,7 +172,3 @@ PDAI-Project/
 | Monthly reports | Sonnet Batch API (50% off) | ~$3-4 |
 | Critic | Groq Llama 3.3 70B | $0 (free) |
 | Embeddings | all-MiniLM-L6-v2 (local) | $0 |
-
-## License
-
-Final project -- ESADE Business School, MiBA 2025.

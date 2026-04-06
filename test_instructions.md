@@ -73,8 +73,7 @@ docker compose up -d
 ```
 
 This starts:
-- **PostgreSQL + pgvector** on port 5432
-- **n8n** on port 5678 (workflow engine, optional)
+- **PostgreSQL + pgvector** on port 5433
 
 Verify:
 
@@ -82,7 +81,7 @@ Verify:
 docker compose ps
 ```
 
-Both containers should show `running` / `healthy`.
+The container should show `running` / `healthy`.
 
 ---
 
@@ -243,17 +242,6 @@ uv run langgraph dev
 ```
 
 Opens at `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024` (requires LangSmith login).
-
----
-
-## 9. n8n Workflows (optional)
-
-1. Open `http://localhost:5678` in your browser
-2. Create an owner account on first launch
-3. Import workflows from `n8n-workflows/`:
-   - `daily-ingest.json` — Cron: daily 6am → calls `/pipeline/daily`
-   - `weekly-briefing.json` — Cron: Friday 8am → calls `/pipeline/weekly`
-   - `monthly-report.json` — Cron: 1st of month 8am → calls `/pipeline/monthly`
 
 ---
 

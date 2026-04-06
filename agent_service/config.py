@@ -7,7 +7,7 @@ load_dotenv()
 class Settings(BaseSettings):
     # Database
     db_host: str = "localhost"
-    db_port: int = 5432
+    db_port: int = 5433
     db_name: str = "ai_trends"
     db_user: str = "trends"
     db_password: str = "changeme"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # LangSmith
     langchain_tracing_v2: bool = True
     langchain_api_key: str = ""
-    langchain_project: str = "ai-trends-explorer"
+    langchain_project: str = "PDAI-Project"
 
     @property
     def database_url(self) -> str:

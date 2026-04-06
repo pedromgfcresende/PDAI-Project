@@ -90,7 +90,7 @@ User / Dashboard (static HTML)
 
 | Component | Choice |
 |-----------|--------|
-| Workflow engine | n8n (self-hosted Docker) |
+| Scheduling | AWS Lambda + EventBridge (production) |
 | Database | PostgreSQL + pgvector (Docker) |
 | Agent framework | LangGraph (with LangChain) |
 | Observability | LangSmith free tier (5,000 traces/month) |
@@ -103,7 +103,7 @@ User / Dashboard (static HTML)
 
 ```
 PDAI-Project/
-├── docker-compose.yml             # PostgreSQL + n8n (local infra)
+├── docker-compose.yml             # PostgreSQL (local infra)
 ├── Dockerfile                     # Container image for agent service
 ├── .env.example                   # Environment template
 ├── .env                           # Never committed — API keys
@@ -135,10 +135,10 @@ PDAI-Project/
 │       ├── monthly_report.txt    # Monthly report prompt
 │       └── critic.txt            # Quality review prompt
 │
-├── n8n-workflows/                # Exported n8n workflow JSON files
-│   ├── daily-ingest.json         # Cron: daily → /pipeline/daily
-│   ├── weekly-briefing.json      # Cron: Friday → /pipeline/weekly
-│   └── monthly-report.json       # Cron: 1st of month → /pipeline/monthly
+├── lambda-triggers/              # AWS Lambda functions for scheduling
+│   ├── daily_ingest.py           # EventBridge: daily → /pipeline/daily
+│   ├── weekly_report.py          # EventBridge: Friday → /pipeline/weekly + SES email
+│   └── monthly_report.py         # EventBridge: 1st of month → /pipeline/monthly + SES email
 │
 └── dashboard/
     └── index.html                # Static dashboard (HTML + JS)
@@ -204,17 +204,17 @@ Schema lives in `init-db.sql`.
 
 ---
 
-## n8n Workflows
+## Scheduling (AWS Lambda + EventBridge)
 
-Pre-built workflows for automated scheduling (optional — pipelines can also be triggered manually via the dashboard or API):
+For production, three Lambda functions replace manual dashboard triggers:
 
-| Workflow | Trigger | Action |
-|----------|---------|--------|
-| `daily-ingest` | Cron: daily 6am | Pull all sources → normalize → store in Postgres |
-| `weekly-briefing` | Cron: Friday 8am | Fetch week's items → LangGraph pipeline → report |
-| `monthly-report` | Cron: 1st of month 8am | Fetch month's items → deep analysis → report |
+| Function | Schedule | Action |
+|----------|----------|--------|
+| `daily_ingest.py` | Every day 06:00 UTC | Ingest → filter → detect signals |
+| `weekly_report.py` | Every Friday 08:00 UTC | Daily pipeline + weekly report + email via SES |
+| `monthly_report.py` | 1st of month 08:00 UTC | Daily pipeline + monthly report + email via SES |
 
-n8n calls the LangGraph pipeline via HTTP Request node → FastAPI backend.
+Each Lambda calls the FastAPI backend via HTTP, then sends the report HTML through Amazon SES. See `lambda-triggers/README.md` for deployment instructions.
 
 ---
 
@@ -241,7 +241,7 @@ GITHUB_TOKEN=ghp_...
 ## Running the Stack
 
 ```bash
-# Start infrastructure (PostgreSQL + n8n)
+# Start infrastructure (PostgreSQL)
 docker compose up -d
 
 # Run the agent service (dev mode)
