@@ -6,7 +6,7 @@ A multi-agent system that automatically collects AI research papers, news, and s
 
 **Course:** Prototyping Products with AI (PDAI) | ESADE Business School
 
-**Team:** Leo Matthey, Pedro Resende, Ivan Salticov, Miguel Faria | MiBA Second Term, 2025
+**Team:** Leo Matthey, Pedro Resende, Ivan Salticov, Miguel Faria | MiBA Second Term, 2026
 
 ---
 
