@@ -63,8 +63,17 @@ def detect_signals(items: list[dict]) -> list[TrendSignal]:
     response = llm.invoke([{"role": "user", "content": prompt}])
 
     try:
-        import re
-        raw = re.sub(r"```(?:json)?\s*([\s\S]*?)```", r"\1", response.content).strip()
+        text = response.content.strip()
+        # Try extracting from markdown code block first
+        block_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
+        if block_match:
+            raw = block_match.group(1).strip()
+        else:
+            # Try finding a JSON array directly
+            arr_match = re.search(r"\[[\s\S]*\]", text)
+            raw = arr_match.group(0) if arr_match else text
+        # Fix common LLM JSON issues: trailing commas before ] or }
+        raw = re.sub(r",\s*([}\]])", r"\1", raw)
         signals_data = json.loads(raw)
         signals = []
         for s in signals_data:
@@ -84,7 +93,34 @@ def detect_signals(items: list[dict]) -> list[TrendSignal]:
         return signals
     except (json.JSONDecodeError, KeyError, Exception) as e:
         print(f"[signals] Error parsing signals: {e}")
-        return []
+        print(f"[signals] Raw content (first 500 chars): {raw[:500]}")
+        # Fallback: try parsing individual objects from the array
+        try:
+            # Attempt per-object extraction
+            obj_matches = re.findall(r'\{[^{}]+\}', raw)
+            signals = []
+            for obj_str in obj_matches:
+                obj_str = re.sub(r",\s*([}\]])", r"\1", obj_str)
+                try:
+                    s = json.loads(obj_str)
+                    if "signal_type" in s and "topic" in s:
+                        evidence_ids = []
+                        for idx in s.get("evidence_ids", []):
+                            if isinstance(idx, int) and 1 <= idx <= len(items) and items[idx - 1].get("id"):
+                                evidence_ids.append(items[idx - 1]["id"])
+                        signals.append(TrendSignal(
+                            signal_type=s["signal_type"],
+                            topic=s["topic"],
+                            description=s.get("description", ""),
+                            strength=s.get("strength", 0.5),
+                            evidence_ids=evidence_ids,
+                        ))
+                except (json.JSONDecodeError, KeyError):
+                    continue
+            print(f"[signals] Fallback extracted {len(signals)} signals")
+            return signals
+        except Exception:
+            return []
 
 
 def detect_signals_simple(items: list[dict]) -> list[TrendSignal]:
